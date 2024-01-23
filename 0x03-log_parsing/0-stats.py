@@ -4,51 +4,40 @@ Topic: Log Parsing
 Author: Khotso Selading
 Date: 22-01-2024
 """
+
 import sys
 
+if __name__ == '__main__':
 
-def process_line(line):
-    try:
-        parts = line.split()
-        ip_address = parts[0]
-        status_code = int(parts[-2])
-        file_size = int(parts[-1])
+    filesize = 0
+    count = 0
+    codes = {"200", "301", "400", "401", "403", "404", "405", "500"}
+    stats = {k: 0 for k in codes}
 
-        return ip_address, status_code, file_size
-    except (ValueError, IndexError):
-        return None, None, None
-
-
-def main():
-    total_size = 0
-    status_counts = {200: 0, 301: 0, 400: 0, 401: 0, 403: 0, 404: 0, 405: 0,
-                     500: 0}
-    lines_processed = 0
+    def print_stats(stats: dict, file_size: int) -> None:
+        print("Total File size: {:d}".format(file_size))
+        for k, v in sorted(stats.items()):
+            if v:
+                print("{}: {}".format(k, v))
 
     try:
-        for line in sys.stdin:
-            ip_address, status_code, file_size = process_line(line)
-
-            if ip_address is not None:
-                total_size += file_size
-                status_counts[status_code] += 1
-                lines_processed += 1
-
-            if lines_processed % 10 == 0:
-                print_stats(total_size, status_counts)
+        for line_spliter in sys.stdin:
+            count += 1
+            data = line_spliter.split()
+            try:
+                status_code = data[-2]
+                if status_code in codes:
+                    stats[status_code] += 1
+            except IndexError:
+                pass
+            try:
+                filesize += int(data[-1])
+            except (ValueError, IndexError):
+                pass
+            if count % 10 == 0:
+                print_stats(stats, filesize)
+        print_stats(stats, filesize)
 
     except KeyboardInterrupt:
-        print_stats(total_size, status_counts)
-
-
-def print_stats(total_size, status_counts):
-    print(f"Total file size: {total_size}")
-    for status_code in sorted(status_counts.keys()):
-        count = status_counts[status_code]
-        if count > 0:
-            print(f"{status_code}: {count}")
-    print()
-
-
-if __name__ == "__main__":
-    main()
+        print_stats(stats, filesize)
+        raise
