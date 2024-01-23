@@ -7,37 +7,33 @@ Date: 22-01-2024
 
 import sys
 
-if __name__ == '__main__':
+cache = {'200': 0, '301': 0, '400': 0, '401': 0,
+         '403': 0, '404': 0, '405': 0, '500': 0}
+total_size, cache_count = 0
 
-    filesize = 0
-    count = 0
-    codes = {"200", "301", "400", "401", "403", "404", "405", "500"}
-    stats = {k: 0 for k in codes}
+try:
+    for line in sys.stdin:
+        line_list = line.split(" ")
+        if len(line_list) > 4:
+            code = line_list[-2]
+            size = int(line_list[-1])
+            if code in cache.keys():
+                cache[code] += 1
+            total_size += size
+            cache_count += 1
 
-    def print_stats(stats: dict, file_size: int) -> None:
-        print("Total File size: {:d}".format(file_size))
-        for k, v in sorted(stats.items()):
-            if v:
-                print("{}: {}".format(k, v))
+        if cache_count == 10:
+            cache_count = 0
+            print('File size: {}'.format(total_size))
+            for key, value in sorted(cache.items()):
+                if value != 0:
+                    print('{}: {}'.format(key, value))
 
-    try:
-        for line_spliter in sys.stdin:
-            count += 1
-            data = line_spliter.split()
-            try:
-                status_code = data[-2]
-                if status_code in codes:
-                    stats[status_code] += 1
-            except IndexError:
-                pass
-            try:
-                filesize += int(data[-1])
-            except (ValueError, IndexError):
-                pass
-            if count % 10 == 0:
-                print_stats(stats, filesize)
-        print_stats(stats, filesize)
+except Exception as err:
+    pass
 
-    except KeyboardInterrupt:
-        print_stats(stats, filesize)
-        raise
+finally:
+    print('File size: {}'.format(total_size))
+    for key, value in sorted(cache.items()):
+        if value != 0:
+            print('{}: {}'.format(key, value))
