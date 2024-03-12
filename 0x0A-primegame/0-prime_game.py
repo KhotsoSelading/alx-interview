@@ -6,37 +6,23 @@ Date: 10-03-2024
 """
 
 
-def sieve_of_eratosthenes(n):
-    """
-    Finds prime numbers
-    """
-    primes = [True] * (n + 1)
-    primes[0], primes[1] = False, False
-    p = 2
-    while p * p <= n:
-        if primes[p]:
-            for i in range(p * p, n + 1, p):
-                primes[i] = False
-        p += 1
-    return [i for i in range(n + 1) if primes[i]]
-
-
-def is_winner(x, nums):
-    """
-    Chooses winner
-    """
-    players = {'Maria': 0, 'Ben': 0}
-
-    for num in nums:
-        primes = sieve_of_eratosthenes(num)
-        if len(primes) % 2 == 0:
-            players['Ben'] += 1
-        else:
-            players['Maria'] += 1
-
-    if players['Maria'] > players['Ben']:
-        return 'Maria'
-    elif players['Maria'] < players['Ben']:
-        return 'Ben'
-    else:
+def isWinner(x, nums):
+    """Deteremins winner of the prime number game"""
+    if x < 1 or not nums:
         return None
+    marias_wins, bens_wins = 0, 0
+    n = max(nums)
+    primes = [True for _ in range(1, n + 1, 1)]
+    primes[0] = False
+    for i, is_prime in enumerate(primes, 1):
+        if i == 1 or not is_prime:
+            continue
+        for j in range(i + i, n + 1, i):
+            primes[j - 1] = False
+    for _, n in zip(range(x), nums):
+        primes_count = len(list(filter(lambda x: x, primes[0: n])))
+        bens_wins += primes_count % 2 == 0
+        marias_wins += primes_count % 2 == 1
+    if marias_wins == bens_wins:
+        return None
+    return 'Maria' if marias_wins > bens_wins else 'Ben'
