@@ -6,39 +6,45 @@ Date: 10-03-2024
 """
 
 
-def is_prime(num):
+def generate_primes(limit):
     """
     Finds prime number
     """
-    if num < 2:
-        return False
-    for i in range(2, int(num ** 0.5) + 1):
-        if num % i == 0:
-            return False
-    return True
+    primes = [True] * (limit + 1)
+    primes[0] = primes[1] = False
+    for i in range(2, int(limit ** 0.5) + 1):
+        if primes[i]:
+            for j in range(i * i, limit + 1, i):
+                primes[j] = False
+    return [i for i in range(limit + 1) if primes[i]]
+
+
+def determine_winner(n):
+    """
+    Deteremines winner
+    """
+    primes = generate_primes(n)
+    if len(primes) % 2 == 0:
+        return "Ben"
+    else:
+        return "Maria"
 
 
 def isWinner(x, nums):
     """
-    Finds the winner
+    Gets winner
     """
-    maria_wins = 0
-    ben_wins = 0
-
+    maria_wins = ben_wins = 0
     for n in nums:
-        if n == 1:
-            ben_wins += 1
-            continue
-
-        primes_count = sum(1 for i in range(2, n + 1) if is_prime(i))
-        if primes_count % 2 == 0:
-            ben_wins += 1
-        else:
+        winner = determine_winner(n)
+        if winner == "Maria":
             maria_wins += 1
+        elif winner == "Ben":
+            ben_wins += 1
 
     if maria_wins > ben_wins:
         return "Maria"
-    elif ben_wins > maria_wins:
+    elif maria_wins < ben_wins:
         return "Ben"
     else:
         return None
